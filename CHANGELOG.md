@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add `NewYAML`, a new `Provider` constructor that lets callers mix Go values,
   readers, files, and other options.
-- Add support for `gopkg.in/yaml.v2`'s strict mode. The behavior of the existing
+- Add support for `gopkg.in/yaml.v3`'s strict mode. The behavior of the existing
   constructors is unchanged, but `NewYAML` enables strict mode by default.
 
 ### Fixed

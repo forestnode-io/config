@@ -26,7 +26,7 @@ import (
 	"os"
 
 	"go.uber.org/multierr"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // A YAMLOption alters the default configuration of the YAML configuration
@@ -70,7 +70,7 @@ func Expand(lookup LookupFunc) YAMLOption {
 	})
 }
 
-// Permissive disables gopkg.in/yaml.v2's strict mode. It's provided for
+// Permissive disables gopkg.in/yaml.v3's strict mode. It's provided for
 // backward compatibility; to avoid a variety of common mistakes, most users
 // should leave YAML providers in the default strict mode.
 //

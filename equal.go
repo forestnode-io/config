@@ -24,7 +24,7 @@ import (
 	"bytes"
 	"fmt"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // areSameYAML checks whether two values represent the same YAML data. It's

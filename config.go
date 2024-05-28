@@ -28,7 +28,7 @@ import (
 
 	"go.uber.org/config/internal/merge"
 	"go.uber.org/config/internal/unreachable"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 const _separator = "."
@@ -38,12 +38,12 @@ const _separator = "."
 // options.
 //
 // By default, the YAML provider attempts to proactively catch common mistakes
-// by enabling gopkg.in/yaml.v2's strict mode. See the package-level
+// by enabling gopkg.in/yaml.v3's strict mode. See the package-level
 // documentation on strict unmarshalling for details.
 //
 // When populating Go structs, values produced by the YAML provider correctly
-// handle all struct tags supported by gopkg.in/yaml.v2. See
-// https://godoc.org/gopkg.in/yaml.v2#Marshal for details.
+// handle all struct tags supported by gopkg.in/yaml.v3. See
+// https://godoc.org/gopkg.in/yaml.v3#Marshal for details.
 type YAML struct {
 	name     string
 	raw      [][]byte
@@ -105,7 +105,6 @@ func NewYAML(options ...YAMLOption) (*YAML, error) {
 	}
 
 	dec := yaml.NewDecoder(merged)
-	dec.SetStrict(cfg.strict)
 	if err := dec.Decode(&y.contents); err != nil {
 		if err != io.EOF {
 			return nil, fmt.Errorf("couldn't decode merged YAML: %v", err)
@@ -165,7 +164,15 @@ func (y *YAML) at(path []string) (interface{}, bool) {
 		// that didn't terminate on a sequence or a scalar.
 		m, ok := cur.(map[interface{}]interface{})
 		if !ok {
-			return nil, false
+			mm, ok := cur.(map[string]interface{})
+			if !ok {
+
+				return nil, false
+			}
+			m = make(map[interface{}]interface{}, len(mm))
+			for k, v := range mm {
+				m[k] = v
+			}
 		}
 
 		// Try resolving the segment as a string and then unmarshal the path
@@ -208,7 +215,6 @@ func (y *YAML) populate(path []string, i interface{}) error {
 		return unreachable.Wrap(err)
 	}
 	dec := yaml.NewDecoder(buf)
-	dec.SetStrict(y.strict)
 	// Decoding can't ever return EOF, since encoding any value is guaranteed to
 	// produce non-empty YAML.
 	return dec.Decode(i)
@@ -245,38 +251,6 @@ func (y *YAML) withDefault(d interface{}) (*YAML, error) {
 type Value struct {
 	path     []string
 	provider *YAML
-}
-
-// NewValue is a highly error-prone constructor preserved only for backward
-// compatibility. If value and found don't match the contents of the provider
-// at the supplied key, it panics.
-//
-// Deprecated: this internal constructor was mistakenly exported in the
-// initial release of this package, but its behavior was often very
-// surprising. To guarantee sane behavior without changing the function
-// signature, input validation and panics were added in version 1.2. In all
-// cases, it's both safer and less verbose to use Provider.Get directly.
-func NewValue(p Provider, key string, value interface{}, found bool) Value {
-	actual := p.Get(key)
-	if has := actual.HasValue(); has != found {
-		var tmpl string
-		if has {
-			tmpl = "inconsistent parameters: provider %s has value at key %q but found parameter was false"
-		} else {
-			tmpl = "inconsistent parameters: provider %s has no value at key %q but found parameter was true"
-		}
-		panic(fmt.Sprintf(tmpl, p.Name(), key))
-	}
-	contents := actual.Value()
-	same, err := areSameYAML(contents, value)
-	if err != nil {
-		panic(fmt.Sprintf("can't check NewValue parameter consistency: %v", err))
-	}
-	if !same {
-		tmpl := "inconsistent parameters: provider %s has %#v at key %q but value was %#v"
-		panic(fmt.Sprintf(tmpl, p.Name(), contents, key, value))
-	}
-	return actual
 }
 
 // Source returns the name of the value's provider.

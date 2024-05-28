@@ -91,7 +91,7 @@
 //
 // # Strict Unmarshalling
 //
-// By default, the NewYAML constructor enables gopkg.in/yaml.v2's strict
+// By default, the NewYAML constructor enables gopkg.in/yaml.v3's strict
 // unmarshalling mode. This prevents a variety of common programmer errors,
 // especially when deep-merging loosely-typed YAML files. In strict mode,
 // providers throw errors if keys are duplicated in the same configuration

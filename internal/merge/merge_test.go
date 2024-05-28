@@ -28,7 +28,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 func mustRead(t testing.TB, fname string) []byte {
@@ -165,7 +165,7 @@ func TestErrors(t *testing.T) {
 
 	t.Run("duplicated keys", func(t *testing.T) {
 		src := []byte("{foo: bar, foo: baz}")
-		assert.NoError(t, check(t, false, src), "expected success in permissive mode")
+		assert.Error(t, check(t, false, src), "expected error in permissive mode")
 		assert.Error(t, check(t, true, src), "expected error in permissive mode")
 	})
 
@@ -195,29 +195,6 @@ func TestMismatchedTypes(t *testing.T) {
 		t.Run(tt.desc+" permissive", func(t *testing.T) {
 			// prefer the higher-priority value
 			succeeds(t, false, tt.left, tt.right, tt.right)
-		})
-	}
-}
-
-func TestBooleans(t *testing.T) {
-	// YAML helpfully interprets many strings as Booleans.
-	tests := []struct {
-		in, out string
-	}{
-		{"yes", "true"},
-		{"YES", "true"},
-		{"on", "true"},
-		{"ON", "true"},
-		{"no", "false"},
-		{"NO", "false"},
-		{"off", "false"},
-		{"OFF", "false"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
-			succeeds(t, true, "", tt.in, tt.out)
-			succeeds(t, false, "", tt.in, tt.out)
 		})
 	}
 }

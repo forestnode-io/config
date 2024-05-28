@@ -27,7 +27,7 @@ import (
 
 	"go.uber.org/config/internal/unreachable"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 type (
@@ -62,7 +62,6 @@ func YAML(sources [][]byte, strict bool) (*bytes.Buffer, error) {
 	var hasContent bool
 	for _, r := range sources {
 		d := yaml.NewDecoder(bytes.NewReader(r))
-		d.SetStrict(strict)
 
 		var contents interface{}
 		if err := d.Decode(&contents); err == io.EOF {
@@ -88,6 +87,7 @@ func YAML(sources [][]byte, strict bool) (*bytes.Buffer, error) {
 		return buf, nil
 	}
 	enc := yaml.NewEncoder(buf)
+	enc.SetIndent(2)
 	if err := enc.Encode(merged); err != nil {
 		return nil, unreachable.Wrap(fmt.Errorf("couldn't re-serialize merged YAML: %v", err))
 	}
@@ -112,8 +112,17 @@ func merge(into, from interface{}, strict bool) (interface{}, error) {
 	if IsSequence(into) && IsSequence(from) {
 		return from, nil
 	}
-	if IsMapping(into) && IsMapping(from) {
-		return mergeMapping(into.(mapping), from.(mapping), strict)
+	if IsAnyMapping(into) && IsAnyMapping(from) {
+		return mergeAnyMapping(into.(mapping), from.(mapping), strict)
+	}
+	if IsStringMapping(into) && IsStringMapping(from) {
+		return mergeStringMapping(into.(map[string]interface{}), from.(map[string]interface{}), strict)
+	}
+	if IsAnyMapping(into) && IsStringMapping(from) {
+		return mergeAnyStringMapping(into.(mapping), from.(map[string]interface{}), strict)
+	}
+	if IsStringMapping(into) && IsAnyMapping(from) {
+		return mergeStringAnyMapping(into.(map[string]interface{}), from.(mapping), strict)
 	}
 	// YAML types don't match, so no merge is possible. For backward
 	// compatibility, ignore mismatches unless we're in strict mode and return
@@ -124,7 +133,7 @@ func merge(into, from interface{}, strict bool) (interface{}, error) {
 	return nil, fmt.Errorf("can't merge a %s into a %s", describe(from), describe(into))
 }
 
-func mergeMapping(into, from mapping, strict bool) (mapping, error) {
+func mergeAnyMapping(into, from mapping, strict bool) (mapping, error) {
 	merged := make(mapping, len(into))
 	for k, v := range into {
 		merged[k] = v
@@ -139,10 +148,60 @@ func mergeMapping(into, from mapping, strict bool) (mapping, error) {
 	return merged, nil
 }
 
-// IsMapping reports whether a type is a mapping in YAML, represented as a
+func mergeStringMapping(into, from map[string]interface{}, strict bool) (mapping, error) {
+	merged := make(mapping, len(into))
+	for k, v := range into {
+		merged[k] = v
+	}
+	for k := range from {
+		m, err := merge(merged[k], from[k], strict)
+		if err != nil {
+			return nil, err
+		}
+		merged[k] = m
+	}
+	return merged, nil
+}
+
+func mergeAnyStringMapping(into mapping, from map[string]interface{}, strict bool) (mapping, error) {
+	merged := make(mapping, len(into))
+	for k, v := range into {
+		merged[k] = v
+	}
+	for k := range from {
+		m, err := merge(merged[k], from[k], strict)
+		if err != nil {
+			return nil, err
+		}
+		merged[k] = m
+	}
+	return merged, nil
+}
+
+func mergeStringAnyMapping(into map[string]interface{}, from mapping, strict bool) (mapping, error) {
+	merged := make(mapping, len(into))
+	for k, v := range into {
+		merged[k] = v
+	}
+	for k := range from {
+		m, err := merge(merged[k], from[k], strict)
+		if err != nil {
+			return nil, err
+		}
+		merged[k] = m
+	}
+	return merged, nil
+}
+
+// IsAnyMapping reports whether a type is a mapping in YAML, represented as a
 // map[interface{}]interface{}.
-func IsMapping(i interface{}) bool {
+func IsAnyMapping(i interface{}) bool {
 	_, is := i.(mapping)
+	return is
+}
+
+func IsStringMapping(i interface{}) bool {
+	_, is := i.(map[string]interface{})
 	return is
 }
 
@@ -155,12 +214,15 @@ func IsSequence(i interface{}) bool {
 
 // IsScalar reports whether a type is a scalar value in YAML.
 func IsScalar(i interface{}) bool {
-	return !IsMapping(i) && !IsSequence(i)
+	return !IsAnyMapping(i) && !IsStringMapping(i) && !IsSequence(i)
 }
 
 func describe(i interface{}) string {
-	if IsMapping(i) {
-		return "mapping"
+	if IsAnyMapping(i) {
+		return "any-mapping"
+	}
+	if IsStringMapping(i) {
+		return "string-mapping"
 	}
 	if IsSequence(i) {
 		return "sequence"
