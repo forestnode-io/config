@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package config // import "go.uber.org/config"
+package config // import "github.com/forestnode-io/config"
 
 // Version is the current semantic version.
 const Version = "1.5.0"

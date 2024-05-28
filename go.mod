@@ -1,4 +1,4 @@
-module go.uber.org/config
+module github.com/forestnode-io/config
 
 go 1.22.1
 

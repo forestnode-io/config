@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"io"
 
-	"go.uber.org/config/internal/unreachable"
+	"github.com/forestnode-io/config/internal/unreachable"
 
 	yaml "gopkg.in/yaml.v3"
 )

@@ -1,11 +1,11 @@
-# :fishing_pole_and_fish: config [![GoDoc][doc-img]][doc] [![Build Status][ci-img]][ci] [![Coverage Status][cov-img]][cov]
+# :fishing_pole_and_fish: config [![GoDoc][doc-img]][doc]
 
 Convenient, injection-friendly YAML configuration.
 
 ## Installation
 
 ```
-go get -u go.uber.org/config
+go get -u github.com/forestnode-io/config
 ```
 
 Note that config only supports the two most recent minor versions of Go.
@@ -50,10 +50,10 @@ config to `^1`.
 Released under the [MIT License](LICENSE.txt).
 
 [doc-img]: http://img.shields.io/badge/GoDoc-Reference-blue.svg
-[doc]: https://godoc.org/go.uber.org/config
+[doc]: https://godoc.org/github.com/forestnode-io/config
 
-[ci-img]: https://github.com/uber-go/config/actions/workflows/go.yml/badge.svg
-[ci]: https://github.com/uber-go/config/actions/workflows/go.yml
+[ci-img]: https://github.com/forestnode-io/config/actions/workflows/go.yml/badge.svg
+[ci]: https://github.com/forestnode-io/config/actions/workflows/go.yml
 
-[cov-img]: https://codecov.io/gh/uber-go/config/branch/master/graph/badge.svg
-[cov]: https://codecov.io/gh/uber-go/config/branch/master
+[cov-img]: https://codecov.io/gh/forestnode-io/config/branch/master/graph/badge.svg
+[cov]: https://codecov.io/gh/forestnode-io/config/branch/master

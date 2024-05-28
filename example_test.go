@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"strings"
 
-	"go.uber.org/config"
+	"github.com/forestnode-io/config"
 )
 
 func Example() {

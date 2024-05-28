@@ -31,5 +31,5 @@ func TestWrap(t *testing.T) {
 	wrapped := Wrap(errors.New("boom")).Error()
 
 	assert.Contains(t, wrapped, "boom")
-	assert.Contains(t, wrapped, "github.com/uber-go/config")
+	assert.Contains(t, wrapped, "github.com/forestnode-io/config")
 }
