@@ -3,6 +3,7 @@ module github.com/forestnode-io/config
 go 1.22.1
 
 require (
+	github.com/raphaelreyna/policyauthor v0.5.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
